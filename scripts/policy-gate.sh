@@ -51,12 +51,18 @@ total_fail = 0
 for ns_result in results:
     namespace = ns_result.get("namespace", "unknown")
     failures = ns_result.get("failures", [])
-    for failure in failures:
-        total_fail += 1
-        print(f"FAIL [{namespace}] {failure.get('msg', failure)}")
+    if isinstance(failures, list):
+        for failure in failures:
+            total_fail += 1
+            print(f"FAIL [{namespace}] {failure.get('msg', failure)}")
     successes = ns_result.get("successes", [])
-    for success in successes:
-        print(f"PASS [{namespace}] {success.get('msg', 'ok')}")
+    # Newer Conftest (>=0.45) returns successes as an integer count, not an array
+    if isinstance(successes, int):
+        if successes:
+            print(f"PASS [{namespace}] {successes} rule(s) passed")
+    else:
+        for success in successes:
+            print(f"PASS [{namespace}] {success.get('msg', 'ok')}")
 
 if total_fail:
     print(f"\n{total_fail} policy violation(s) found.")
