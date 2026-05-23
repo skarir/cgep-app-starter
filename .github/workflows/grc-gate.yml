@@ -1,0 +1,188 @@
+##############################################################################
+# GRC Compliance Gate — Layer 3 (CGE-P Capstone)
+# Primary framework: HIPAA Security Rule
+#
+# Five named steps:
+#   1. Plan     — terraform plan -json
+#   2. Policy   — Conftest against plan JSON
+#   3. Apply    — terraform apply (merge to main only)
+#   4. Sign     — Cosign keyless via GitHub OIDC
+#   5. Upload   — push signed bundle to S3 Object Lock vault
+#
+# Two required PRs:
+#   - A compliant PR that passes Step 2 and merges (green)
+#   - A PR that introduces a gap; Step 2 blocks the merge (red)
+##############################################################################
+
+name: GRC Compliance Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write   # required for Cosign keyless signing via GitHub OIDC
+
+env:
+  AWS_REGION: us-east-1
+  TF_DIR: terraform
+  POLICY_DIR: policies
+  # Set EVIDENCE_BUCKET in GitHub Actions secrets / vars
+  EVIDENCE_BUCKET: ${{ vars.EVIDENCE_BUCKET }}
+
+jobs:
+  grc-gate:
+    name: GRC Compliance Gate
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Prerequisites ────────────────────────────────────────────────
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          # Scoped to this repo; sub-claim = repo:skarir/cgep-app-starter:*
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.6"
+
+      - name: Install Conftest
+        run: |
+          CONFTEST_VERSION="0.55.0"
+          curl -Lo conftest.tar.gz \
+            "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz"
+          tar xzf conftest.tar.gz conftest
+          sudo mv conftest /usr/local/bin/
+          conftest --version
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: "v2.4.1"
+
+      - name: Install tfsec
+        run: |
+          curl -Lo tfsec \
+            "https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64"
+          chmod +x tfsec
+          sudo mv tfsec /usr/local/bin/
+
+      # ── Step 1: Plan ─────────────────────────────────────────────────
+      - name: "Step 1 — Terraform Plan"
+        id: tf-plan
+        run: |
+          cd $TF_DIR
+          terraform init -input=false -backend=false
+          terraform plan \
+            -out=tfplan \
+            -input=false \
+            -lock=false \
+            2>&1 | tee plan.log
+          terraform show -json tfplan > ../plan.json
+          echo "Plan JSON written to plan.json"
+
+      # ── Step 2: Policy check ─────────────────────────────────────────
+      - name: "Step 2 — Policy Check (Conftest + tfsec)"
+        id: policy-check
+        run: |
+          echo "--- OPA policy tests ---"
+          opa test ./policies -v 2>&1 | tee opa-test.log
+
+          echo "--- Conftest gate ---"
+          # Use || true so JSON results are always written; exit-code checked below
+          RESULTS_FILE=conftest-results.json bash scripts/policy-gate.sh plan.json || CONFTEST_FAILED=true
+
+          echo "--- tfsec static scan ---"
+          tfsec $TF_DIR --format json --out tfsec-results.json || true
+
+          # Fail the step if Conftest found violations
+          if [[ "${CONFTEST_FAILED:-false}" == "true" ]]; then
+            echo "::error::Policy gate blocked — Conftest found compliance violations."
+            exit 1
+          fi
+
+        # Always upload evidence artefacts even on policy failure
+        continue-on-error: false
+
+      - name: Upload plan + policy results as artefact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grc-evidence-${{ github.run_id }}
+          path: |
+            plan.json
+            conftest-results.json
+            tfsec-results.json
+            opa-test.log
+          retention-days: 90
+
+      # ── Step 3: Apply (merge to main only) ───────────────────────────
+      - name: "Step 3 — Terraform Apply"
+        id: tf-apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd $TF_DIR
+          terraform apply -auto-approve -input=false tfplan 2>&1 | tee apply.log
+          terraform output -json > ../tf-outputs.json
+          echo "Apply complete."
+
+      # ── Step 4: Sign evidence bundle ─────────────────────────────────
+      - name: "Step 4 — Sign Evidence Bundle (Cosign keyless)"
+        id: sign
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          BUNDLE_NAME="evidence-bundle-${{ github.run_id }}.tar.gz"
+          SHA_NAME="${BUNDLE_NAME}.sha256"
+          SIG_NAME="${BUNDLE_NAME}.sig.bundle"
+
+          # Bundle the plan + policy results + outputs
+          tar czf "$BUNDLE_NAME" \
+            plan.json \
+            conftest-results.json \
+            tfsec-results.json \
+            tf-outputs.json || true
+
+          # Integrity sidecar
+          sha256sum "$BUNDLE_NAME" | awk '{print $1}' > "$SHA_NAME"
+          echo "SHA-256: $(cat $SHA_NAME)"
+
+          # Cosign keyless sign (GitHub OIDC → Fulcio cert → Rekor entry)
+          cosign sign-blob \
+            --yes \
+            --bundle "$SIG_NAME" \
+            "$BUNDLE_NAME"
+
+          echo "Signed. Bundle file: $BUNDLE_NAME"
+          echo "BUNDLE_NAME=$BUNDLE_NAME" >> "$GITHUB_ENV"
+          echo "SHA_NAME=$SHA_NAME" >> "$GITHUB_ENV"
+          echo "SIG_NAME=$SIG_NAME" >> "$GITHUB_ENV"
+
+      # ── Step 5: Upload to Object Lock vault ──────────────────────────
+      - name: "Step 5 — Upload Signed Bundle to Evidence Vault"
+        id: upload
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          VAULT_PREFIX="runs/${{ github.run_id }}"
+
+          aws s3 cp "${{ env.BUNDLE_NAME }}" \
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}"
+
+          aws s3 cp "${{ env.SHA_NAME }}" \
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SHA_NAME }}"
+
+          aws s3 cp "${{ env.SIG_NAME }}" \
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SIG_NAME }}"
+
+          echo "Evidence uploaded to s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/"
+          echo "Verify with: bash scripts/verify-evidence.sh s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}"
