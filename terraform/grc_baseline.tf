@@ -21,7 +21,7 @@ resource "aws_kms_key" "phi" {
   enable_key_rotation     = true
 
   tags = {
-    Control = "HIPAA-164.312(a)(2)(iv)"
+    Control = "HIPAA-164.312-a-2-iv"
     Purpose = "phi-encryption"
   }
 }
@@ -41,7 +41,7 @@ resource "aws_s3_bucket" "evidence" {
   object_lock_enabled = true
 
   tags = {
-    Control = "HIPAA-164.312(b)"
+    Control = "HIPAA-164.312-b"
     Purpose = "evidence-vault"
   }
 
@@ -117,7 +117,7 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = "${local.name_prefix}-ct-logs-${local.suffix}"
 
   tags = {
-    Control = "HIPAA-164.312(b)"
+    Control = "HIPAA-164.312-b"
     Purpose = "cloudtrail-logs"
   }
 }
@@ -174,7 +174,7 @@ resource "aws_cloudtrail" "main" {
   enable_log_file_validation    = true
   include_global_service_events = true
 
-  tags = { Control = "HIPAA-164.312(b)" }
+  tags = { Control = "HIPAA-164.312-b" }
 
   depends_on = [aws_s3_bucket_policy.cloudtrail_logs]
 }
@@ -252,7 +252,7 @@ resource "aws_security_group" "lambda" {
 
   tags = {
     Name    = "${local.name_prefix}-lambda-sg"
-    Control = "HIPAA-164.312(e)(1)"
+    Control = "HIPAA-164.312-e-1"
   }
 }
 
@@ -265,7 +265,7 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
   tags = {
     Name    = "${local.name_prefix}-dynamodb-endpoint"
-    Control = "HIPAA-164.312(e)(1)"
+    Control = "HIPAA-164.312-e-1"
   }
 }
 
@@ -277,7 +277,7 @@ resource "aws_vpc_endpoint" "s3" {
 
   tags = {
     Name    = "${local.name_prefix}-s3-endpoint"
-    Control = "HIPAA-164.312(e)(1)"
+    Control = "HIPAA-164.312-e-1"
   }
 }
 
@@ -326,6 +326,12 @@ resource "aws_iam_role_policy" "lambda_least_privilege" {
       }
     ]
   })
+}
+
+# Lambda needs the VPC execution policy when placed inside a VPC (GAP-05)
+resource "aws_iam_role_policy_attachment" "lambda_vpc" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }
 
 ######################################################################

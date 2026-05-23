@@ -28,9 +28,3 @@ resource "aws_lambda_function" "intake" {
     security_group_ids = [aws_security_group.lambda.id]
   }
 }
-
-# Lambda in a VPC needs the VPC execution role attachment
-resource "aws_iam_role_policy_attachment" "lambda_vpc" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-}
