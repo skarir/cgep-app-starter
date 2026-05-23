@@ -1,0 +1,22 @@
+# conftest.toml — policy configuration for the GRC gate
+# Conftest reads this file automatically when run from the repo root.
+
+# Default policy directory (Layer 2 OPA policies)
+policy = ["policies"]
+
+# Namespace mapping: each .rego package is its own namespace.
+# Conftest collects deny rules from all loaded namespaces.
+namespace = [
+  "s3_cmk_encryption",
+  "s3_tls_required",
+  "s3_versioning",
+  "dynamodb_cmk",
+  "lambda_vpc",
+  "iam_least_privilege",
+]
+
+# Output format used by the GRC gate script and CI pipeline.
+output = "json"
+
+# Treat all-namespaces as the default scan mode.
+all_namespaces = true
