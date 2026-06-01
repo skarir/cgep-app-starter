@@ -1,73 +1,65 @@
 #!/usr/bin/env bash
-# policy-gate.sh — run Conftest against a Terraform plan JSON file.
+# scripts/policy-gate.sh
+# Lab 3.4 — Run Conftest against a Terraform workspace's plan as a fail-closed gate.
 #
 # Usage:
-#   scripts/policy-gate.sh <plan.json>
+#   policy-gate.sh --workspace <path> [--policy <dir>]
 #
-# Exits 0 if all policies pass, non-zero if any policy fails.
-# Always writes conftest-results.json regardless of pass/fail so CI
-# can upload it as an evidence artifact (the pipeline uses || true
-# on this script and checks the exit code in a follow-up step).
+# Produces:
+#   evidence/lab-3-4/conftest-results.json  — per-namespace JSON results
+#
+# Exits 0 if all namespaces pass, 1 if any violation is found.
+# Always writes the results file so CI can upload it as an evidence artifact.
+
 set -euo pipefail
 
-PLAN_JSON="${1:-plan.json}"
-RESULTS_FILE="${RESULTS_FILE:-conftest-results.json}"
-POLICY_DIR="${POLICY_DIR:-policies}"
+POLICY_DIR="$(cd "$(dirname "$0")/.." && pwd)/policies"
+WORKSPACE=""
+EVIDENCE_DIR="evidence/lab-3-4"
 
-if [[ ! -f "$PLAN_JSON" ]]; then
-  echo "Error: plan file not found: $PLAN_JSON" >&2
-  exit 1
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --workspace) WORKSPACE="$2"; shift 2 ;;
+    --policy)    POLICY_DIR="$2"; shift 2 ;;
+    *) echo "Unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+[[ -z "$WORKSPACE" ]] && { echo "Usage: $0 --workspace <path>" >&2; exit 2; }
+
+mkdir -p "$EVIDENCE_DIR"
+
+# Render plan.json from the saved tfplan in the workspace.
+( cd "$WORKSPACE" && terraform show -json tfplan > "$WORKSPACE/plan.json" )
+
+EXIT=0
+
+{
+  echo "["
+  FIRST=1
+  for ns in compliance.sc28_aws compliance.ac3_aws compliance.cm6_aws compliance.cm6; do
+    [[ $FIRST -eq 1 ]] && FIRST=0 || printf ","
+    # Run each namespace independently; || true prevents set -e from aborting early.
+    OUT=$(conftest test \
+      --policy "$POLICY_DIR" \
+      --namespace "$ns" \
+      --output json \
+      "$WORKSPACE/plan.json" 2>/dev/null || true)
+    # Detect failure via JSON (portable; no grep on colour codes).
+    if ! echo "$OUT" | python3 -c \
+      'import sys,json; d=json.load(sys.stdin); sys.exit(0 if all(len(r.get("failures") or [])==0 for r in d) else 1)' \
+      2>/dev/null; then
+      EXIT=1
+    fi
+    echo "$OUT"
+  done
+  echo "]"
+} > "$EVIDENCE_DIR/conftest-results.json"
+
+if [[ $EXIT -eq 0 ]]; then
+  echo "policy-gate: PASS — all namespaces clean"
+else
+  echo "policy-gate: FAIL — violations found"
+  echo "See $EVIDENCE_DIR/conftest-results.json"
 fi
-
-echo "Running Conftest policy gate..."
-echo "  Plan:    $PLAN_JSON"
-echo "  Policies: $POLICY_DIR/"
-echo "  Results: $RESULTS_FILE"
-echo ""
-
-# Run Conftest; capture exit code separately so we still write results
-set +e
-conftest test \
-  --policy "$POLICY_DIR" \
-  --output json \
-  --all-namespaces \
-  "$PLAN_JSON" > "$RESULTS_FILE" 2>&1
-CONFTEST_EXIT=$?
-set -e
-
-# Pretty-print a summary from the JSON results
-python3 - <<'PYEOF'
-import json, sys, os
-
-results_file = os.environ.get("RESULTS_FILE", "conftest-results.json")
-try:
-    with open(results_file) as f:
-        results = json.load(f)
-except Exception as e:
-    print(f"Could not parse results: {e}")
-    sys.exit(0)
-
-total_fail = 0
-for ns_result in results:
-    namespace = ns_result.get("namespace", "unknown")
-    failures = ns_result.get("failures", [])
-    if isinstance(failures, list):
-        for failure in failures:
-            total_fail += 1
-            print(f"FAIL [{namespace}] {failure.get('msg', failure)}")
-    successes = ns_result.get("successes", [])
-    # Newer Conftest (>=0.45) returns successes as an integer count, not an array
-    if isinstance(successes, int):
-        if successes:
-            print(f"PASS [{namespace}] {successes} rule(s) passed")
-    else:
-        for success in successes:
-            print(f"PASS [{namespace}] {success.get('msg', 'ok')}")
-
-if total_fail:
-    print(f"\n{total_fail} policy violation(s) found.")
-else:
-    print("\nAll policies passed.")
-PYEOF
-
-exit $CONFTEST_EXIT
+exit $EXIT

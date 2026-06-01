@@ -36,9 +36,7 @@ _tls_enforcing_policies contains policy_bucket if {
   policy_doc := json.unmarshal(after.policy)
   some stmt in policy_doc.Statement
   stmt.Effect == "Deny"
-
-  some condition_key in [k | k := stmt.Condition.Bool[_]; true]
-  lower(condition_key) == lower("aws:SecureTransport")
+  stmt.Condition.Bool["aws:SecureTransport"] == "false"
 
   policy_bucket := after.bucket
 }
