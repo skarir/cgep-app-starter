@@ -1,5 +1,5 @@
-# main.tf
-# Lab 2.3 – First Compliant Resource (AWS S3)
+﻿# main.tf
+# Lab 2.3 - First Compliant Resource (AWS S3)
 # Controls enforced: SC-28, AU-3, AU-6, CM-6, AC-3
 
 terraform {
@@ -13,7 +13,7 @@ terraform {
 provider "aws" {
   region = "us-east-1"
 
-  # CM-6: Configuration settings – required compliance tags applied to every
+  # CM-6: Configuration settings - required compliance tags applied to every
   # taggable resource by default. Removes the chance of forgetting them.
   default_tags {
     tags = {
@@ -44,8 +44,6 @@ resource "aws_s3_bucket" "primary" {
 }
 
 # SC-28: Protection of information at rest.
-# AES-256 keeps this lab simple. The commented block below shows how you'd
-# switch to KMS-managed keys, covered in a later lab.
 resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
   bucket = aws_s3_bucket.primary.id
   rule {
@@ -53,15 +51,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "primary" {
       sse_algorithm = "AES256"
     }
   }
-
-  # KMS teaser:
-  # rule {
-  #   apply_server_side_encryption_by_default {
-  #     sse_algorithm     = "aws:kms"
-  #     kms_master_key_id = aws_kms_key.bucket.arn
-  #   }
-  #   bucket_key_enabled = true
-  # }
 }
 
 # CM-6: Versioning preserves prior object states for recovery and audit.
@@ -72,7 +61,7 @@ resource "aws_s3_bucket_versioning" "primary" {
   }
 }
 
-# AC-3: Access control – explicit deny on every public access vector.
+# AC-3: Access control - explicit deny on every public access vector.
 resource "aws_s3_bucket_public_access_block" "primary" {
   bucket                  = aws_s3_bucket.primary.id
   block_public_acls       = true
@@ -85,7 +74,6 @@ resource "aws_s3_bucket_public_access_block" "primary" {
 # Log bucket (AU-3 / AU-6)
 # ---------------------------------------------------------------------------
 
-# AU-3 / AU-6: Content of audit records + audit review.
 resource "aws_s3_bucket" "log" {
   bucket = local.log_name
 }

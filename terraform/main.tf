@@ -20,10 +20,12 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Project   = "acme-health-intake"
-      ManagedBy = "terraform"
-      Workload  = "patient-intake-api"
-      DataClass = "phi"
+      Project          = "acme-health-intake"
+      Environment      = "dev"
+      ManagedBy        = "terraform"
+      ComplianceScope  = "cge-p-lab"
+      Workload         = "patient-intake-api"
+      DataClass        = "phi"
     }
   }
 }
