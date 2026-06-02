@@ -180,6 +180,19 @@ resource "aws_cloudtrail" "main" {
 }
 
 ######################################################################
+# AC-3 close: public access block on uploads bucket
+# Ensures no public access vectors exist on PHI data store.
+######################################################################
+
+resource "aws_s3_bucket_public_access_block" "uploads" {
+  bucket                  = aws_s3_bucket.uploads.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+######################################################################
 # GAP-01 close: SSE-KMS with customer CMK on uploads bucket
 # HIPAA 164.312(a)(2)(iv)
 ######################################################################
