@@ -46,6 +46,20 @@ aws securityhub get-findings --region us-east-1 --max-results 50 \
 
 Config is included in `config.tf` but disabled by default (`enable_config = false`). Org-managed accounts often have an SCP blocking `config:PutConfigurationRecorder`. If this account is org-managed, leave Config disabled — the Security Hub finding `Config.1` ("AWS Config should be enabled") is itself documented evidence that the gap is known. Enable Config with `enable_config = true` in `terraform.tfvars` if your account permits it.
 
+## Evidence captured (Lab 5.2 run)
+
+All files uploaded to Object Lock vault `cgep-lab-grc-evidence-vault-b60d9d5f` under `lab-5-2/`:
+
+| File | VersionId | Contents |
+|---|---|---|
+| `security-hub-findings.json` | `xML_myzExXS5FAjQaY26.pvzCS3akQ20` | 6 findings: 1 CRITICAL (Config.1), 5 LOW (CloudWatch metric filters) |
+| `security-hub-hub.json` | `XKBgF1bBW3urW7JqQ4.fS_8y5r7WWz05` | Hub ARN — RA-5/SI-4 attestation |
+| `security-hub-standards.json` | `k01YNjorVmD_1sdtbtOwKikRZ_qcKF91` | NIST 800-53 Rev 5 + FSBP + CIS subscriptions |
+| `cloudtrail-status.json` | `vQIEOhqt4glPhJXAjLWo.kxiWz5uUd81` | IsLogging=true — AU-2/AU-12 attestation |
+| `cloudtrail-trail.json` | `omH6mJ8mL9mrEzQijUuHAm.OKsutdMCe` | LogFileValidationEnabled=true — AU-10 attestation |
+
+**Key finding: `Config.1 CRITICAL`** — "AWS Config should be enabled and use the service-linked role for resource recording." The existing Config recorder (`cgep-config-recorder-lab52-baseline`) was started during this lab; Security Hub detected and documented the gap before the fix was in place.
+
 ## Cleanup
 
 ```bash
