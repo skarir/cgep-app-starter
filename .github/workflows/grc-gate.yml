@@ -147,40 +147,42 @@ jobs:
       # ── Step 4: Sign evidence bundle ─────────────────────────────────
       - name: "Step 4 — Sign Evidence Bundle (Cosign keyless)"
         id: sign
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: always()   # Lab 4.4: sign every run (PRs + merges) — chain must never break
         run: |
           BUNDLE_NAME="evidence-bundle-${{ github.run_id }}.tar.gz"
           SHA_NAME="${BUNDLE_NAME}.sha256"
           SIG_NAME="${BUNDLE_NAME}.sig.bundle"
 
-          # Bundle the plan + policy results + outputs
+          # Bundle all evidence artefacts; tf-outputs.json only exists on apply runs
           tar czf "$BUNDLE_NAME" \
             plan.json \
             conftest-results.json \
             tfsec-results.json \
-            tf-outputs.json || true
+            opa-test.log \
+            $([ -f tf-outputs.json ] && echo tf-outputs.json || true) 2>/dev/null || true
 
           # Integrity sidecar
           sha256sum "$BUNDLE_NAME" | awk '{print $1}' > "$SHA_NAME"
           echo "SHA-256: $(cat $SHA_NAME)"
 
-          # Cosign keyless sign (GitHub OIDC → Fulcio cert → Rekor entry)
+          # Cosign keyless sign — GitHub OIDC → Sigstore Fulcio cert → Rekor timestamp
           cosign sign-blob \
             --yes \
             --bundle "$SIG_NAME" \
             "$BUNDLE_NAME"
 
-          echo "Signed. Bundle file: $BUNDLE_NAME"
+          echo "Signed. Bundle: $BUNDLE_NAME"
           echo "BUNDLE_NAME=$BUNDLE_NAME" >> "$GITHUB_ENV"
-          echo "SHA_NAME=$SHA_NAME" >> "$GITHUB_ENV"
-          echo "SIG_NAME=$SIG_NAME" >> "$GITHUB_ENV"
+          echo "SHA_NAME=$SHA_NAME"       >> "$GITHUB_ENV"
+          echo "SIG_NAME=$SIG_NAME"       >> "$GITHUB_ENV"
 
       # ── Step 5: Upload to Object Lock vault ──────────────────────────
       - name: "Step 5 — Upload Signed Bundle to Evidence Vault"
         id: upload
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: always()   # Lab 4.4: preserve chain on both passing and failing runs
         env:
           RUN_ID: ${{ github.run_id }}
+          SHA:    ${{ github.sha }}
         run: |
           VAULT_PREFIX="runs/${{ github.run_id }}"
 
@@ -193,5 +195,23 @@ jobs:
           aws s3 cp "${{ env.SIG_NAME }}" \
             "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SIG_NAME }}"
 
-          echo "Evidence uploaded to s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/"
-          echo "Verify with: bash scripts/verify-evidence.sh s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}"
+          # Machine-readable receipt consumed by verify-evidence.sh
+          VERSION_ID=$(aws s3api head-object \
+            --bucket "${EVIDENCE_BUCKET}" \
+            --key "${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}" \
+            --query VersionId --output text)
+
+          printf '{"run_id":"%s","vault":"%s","bundle_key":"%s","version_id":"%s","sha256":"%s","commit":"%s","ref":"%s"}\n' \
+            "${{ github.run_id }}" \
+            "${EVIDENCE_BUCKET}" \
+            "${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}" \
+            "${VERSION_ID}" \
+            "$(cat ${{ env.SHA_NAME }})" \
+            "${{ github.sha }}" \
+            "${{ github.ref }}" > receipt.json
+
+          aws s3 cp receipt.json \
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/receipt.json"
+
+          echo "Uploaded to s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/"
+          echo "Verify: EVIDENCE_VAULT=${EVIDENCE_BUCKET} bash scripts/verify-evidence.sh ${{ github.run_id }}"

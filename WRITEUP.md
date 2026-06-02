@@ -126,7 +126,29 @@ GAP-08 mentions WAF. AWS WAF in front of an HTTP API requires an `aws_wafv2_web_
 
 ---
 
-## 6. Evidence Verification Instructions
+## 6. Chain of Custody — Four Properties
+
+Lab 4.4 defines chain of custody through four provable properties. Each is enforced by a different artifact in the pipeline.
+
+| Property | Definition | Artifact that proves it |
+|---|---|---|
+| **Integrity** | The bundle has not been modified since it was created | `.sha256` sidecar — SHA-256 recomputed against the downloaded bundle at verify time |
+| **Authenticity** | The bundle was produced by *this* GitHub Actions run on *this* repository | `.sig.bundle` — Cosign keyless signature tied to the GitHub OIDC subject (`repo:skarir/cgep-app-starter:*`), verified against Sigstore Fulcio CA |
+| **Timeliness** | The signature carries a verifiable timestamp from a trusted third party | Sigstore Rekor transparency log entry embedded in `.sig.bundle` — log entries are append-only and independently auditable |
+| **Preservation** | The bundle cannot be silently deleted or overwritten before the retention window expires | S3 Object Lock GOVERNANCE retention on `cgep-lab-grc-evidence-vault-b60d9d5f` — confirmed by `get-object-retention` in `verify-evidence.sh` |
+
+**Why all four matter:** Immutable storage (Object Lock) prevents deletion but doesn't prove authorship. A signature proves authorship but doesn't prevent the object being swapped in a different bucket. A timestamp in the signature prevents backdating. All three together form a chain no single admin can break without detection.
+
+```bash
+# Full chain-of-custody verification (three checks, one exit code):
+EVIDENCE_VAULT=cgep-lab-grc-evidence-vault-b60d9d5f \
+  bash scripts/verify-evidence.sh <run_id>
+# Output: "CHAIN INTACT for run <run_id>"
+```
+
+---
+
+## 7. Evidence Verification Instructions
 
 ```bash
 # 1. Confirm the pipeline ran and produced a signed bundle
