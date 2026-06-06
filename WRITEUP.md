@@ -83,7 +83,11 @@ The evidence vault uses GOVERNANCE mode rather than COMPLIANCE mode. GOVERNANCE 
 
 ### Cosign keyless signing
 
-Step 4 of the pipeline signs the evidence bundle using Cosign keyless via GitHub OIDC. The OIDC token issued to the runner acts as identity proof; Fulcio issues a short-lived certificate; Rekor creates an immutable transparency log entry. There are no long-lived signing keys to manage or rotate. The downside is that the Sigstore public Rekor instance is a dependency — if Rekor is unavailable, the signing step fails. For a regulated environment, a private Rekor instance would be the right answer.
+Step 3 of the pipeline signs the evidence bundle using Cosign keyless via GitHub OIDC. The OIDC token issued to the runner acts as identity proof; Fulcio issues a short-lived certificate; Rekor creates an immutable transparency log entry. There are no long-lived signing keys to manage or rotate. The downside is that the Sigstore public Rekor instance is a dependency — if Rekor is unavailable, the signing step fails. For a regulated environment, a private Rekor instance would be the right answer.
+
+### CI does not apply (read-only OIDC role)
+
+The pipeline runs Plan → Policy gate → Sign → Upload. It deliberately does **not** run `terraform apply`. The OIDC role the workflow assumes (`cgep-grc-gate`) is read-only by design — no `iam:CreateRole`, `s3:CreateBucket`, etc. — so CI cannot mutate infrastructure even if compromised. Infrastructure is applied locally / out-of-band by an operator who holds change permissions; CI is the **detective** evidence pipeline that proves, on every PR and merge, that the planned state passes the policy gate and produces a signed, immutably-stored bundle. The trade-off: "apply on merge" is not automated. I accepted this because a privileged apply role sitting in CI is a larger standing risk than a manual apply step, and because a silently-failing apply (a read-only role behind an unchecked `apply` command) would be worse than an honest plan-and-attest pipeline. A production setup would use a separate, tightly-scoped apply role gated behind environment protection rules.
 
 ---
 
@@ -100,7 +104,7 @@ Step 4 of the pipeline signs the evidence bundle using Cosign keyless via GitHub
 | HIPAA 164.312(a)(1) | `terraform/grc_baseline.tf` → `aws_iam_role_policy.lambda_least_privilege` | IaC → control |
 | HIPAA 164.312(a)(1) | `policies/iam_least_privilege.rego` | Policy → control |
 | HIPAA 164.312(b) | `terraform/grc_baseline.tf` → `aws_cloudtrail.main`, `aws_s3_bucket.evidence`, `aws_s3_bucket_object_lock_configuration.evidence` | IaC → control |
-| HIPAA 164.312(b) | `.github/workflows/grc-gate.yml` steps 4–5 | Pipeline → control |
+| HIPAA 164.312(b) | `.github/workflows/grc-gate.yml` steps 3–4 | Pipeline → control |
 
 The OSCAL `component-definition.json` (Layer 4) provides the machine-readable version of this table, with Terraform resource addresses as `props` and evidence vault URIs as `links`.
 

@@ -54,6 +54,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "~1.6"
+          terraform_wrapper: false   # don't let the wrapper mask terraform exit codes
 
       - name: Install Conftest
         run: |
@@ -134,18 +135,16 @@ jobs:
             opa-test.log
           retention-days: 90
 
-      # ── Step 3: Apply (merge to main only) ───────────────────────────
-      - name: "Step 3 — Terraform Apply"
-        id: tf-apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          cd $TF_DIR
-          terraform apply -auto-approve -input=false tfplan 2>&1 | tee apply.log
-          terraform output -json > ../tf-outputs.json
-          echo "Apply complete."
+      # ── No apply in CI ───────────────────────────────────────────────
+      # Infrastructure is applied locally / out-of-band by an operator with
+      # change permissions. The CI OIDC role (cgep-grc-gate) is deliberately
+      # read-only, so CI is the *detective* evidence pipeline: plan -> policy
+      # gate -> sign -> upload. This avoids a privileged apply role in CI and
+      # keeps every run a tamper-evident audit record. (Matches the labs
+      # reference pattern; see WRITEUP.md "CI does not apply".)
 
-      # ── Step 4: Sign evidence bundle ─────────────────────────────────
-      - name: "Step 4 — Sign Evidence Bundle (Cosign keyless)"
+      # ── Step 3: Sign evidence bundle ─────────────────────────────────
+      - name: "Step 3 — Sign Evidence Bundle (Cosign keyless)"
         id: sign
         if: always()   # Lab 4.4: sign every run (PRs + merges) — chain must never break
         run: |
@@ -176,8 +175,8 @@ jobs:
           echo "SHA_NAME=$SHA_NAME"       >> "$GITHUB_ENV"
           echo "SIG_NAME=$SIG_NAME"       >> "$GITHUB_ENV"
 
-      # ── Step 5: Upload to Object Lock vault ──────────────────────────
-      - name: "Step 5 — Upload Signed Bundle to Evidence Vault"
+      # ── Step 4: Upload to Object Lock vault ──────────────────────────
+      - name: "Step 4 — Upload Signed Bundle to Evidence Vault"
         id: upload
         if: always()   # Lab 4.4: preserve chain on both passing and failing runs
         env:

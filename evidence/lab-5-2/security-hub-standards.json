@@ -1,0 +1,31 @@
+{
+    "StandardsSubscriptions": [
+        {
+            "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:079092240670:subscription/cis-aws-foundations-benchmark/v/1.2.0",
+            "StandardsArn": "arn:aws:securityhub:::ruleset/cis-aws-foundations-benchmark/v/1.2.0",
+            "StandardsInput": {},
+            "StandardsStatus": "INCOMPLETE",
+            "StandardsControlsUpdatable": "READY_FOR_UPDATES",
+            "StandardsStatusReason": {
+                "StatusReasonCode": "NO_AVAILABLE_CONFIGURATION_RECORDER"
+            }
+        },
+        {
+            "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:079092240670:subscription/aws-foundational-security-best-practices/v/1.0.0",
+            "StandardsArn": "arn:aws:securityhub:us-east-1::standards/aws-foundational-security-best-practices/v/1.0.0",
+            "StandardsInput": {},
+            "StandardsStatus": "INCOMPLETE",
+            "StandardsControlsUpdatable": "READY_FOR_UPDATES",
+            "StandardsStatusReason": {
+                "StatusReasonCode": "NO_AVAILABLE_CONFIGURATION_RECORDER"
+            }
+        },
+        {
+            "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:079092240670:subscription/nist-800-53/v/5.0.0",
+            "StandardsArn": "arn:aws:securityhub:us-east-1::standards/nist-800-53/v/5.0.0",
+            "StandardsInput": {},
+            "StandardsStatus": "PENDING",
+            "StandardsControlsUpdatable": "READY_FOR_UPDATES"
+        }
+    ]
+}

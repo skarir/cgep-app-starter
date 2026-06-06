@@ -1,0 +1,14 @@
+{
+    "Trail": {
+        "Name": "cgep-lab-mgmt",
+        "S3BucketName": "cgep-lab-cloudtrail-2d4644ab",
+        "IncludeGlobalServiceEvents": true,
+        "IsMultiRegionTrail": true,
+        "HomeRegion": "us-east-1",
+        "TrailARN": "arn:aws:cloudtrail:us-east-1:079092240670:trail/cgep-lab-mgmt",
+        "LogFileValidationEnabled": true,
+        "HasCustomEventSelectors": false,
+        "HasInsightSelectors": false,
+        "IsOrganizationTrail": false
+    }
+}
