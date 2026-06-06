@@ -58,7 +58,7 @@ All files uploaded to Object Lock vault `cgep-lab-grc-evidence-vault-b60d9d5f` u
 | `cloudtrail-status.json` | `vQIEOhqt4glPhJXAjLWo.kxiWz5uUd81` | IsLogging=true — AU-2/AU-12 attestation |
 | `cloudtrail-trail.json` | `omH6mJ8mL9mrEzQijUuHAm.OKsutdMCe` | LogFileValidationEnabled=true — AU-10 attestation |
 
-**Key finding: `Config.1 CRITICAL`** — "AWS Config should be enabled and use the service-linked role for resource recording." The existing Config recorder (`cgep-config-recorder-lab52-baseline`) was started during this lab; Security Hub detected and documented the gap before the fix was in place.
+**Key finding: `Config.1 CRITICAL`** — "AWS Config should be enabled and use the service-linked role for resource recording." No Config recorder is running in this account (the NIST/FSBP standards report `NO_AVAILABLE_CONFIGURATION_RECORDER`, and `config.tf` is disabled by default per the SCP note above). Security Hub surfacing this finding is the intended outcome: the account is reporting its own known gap as evidence.
 
 ## Cleanup
 

@@ -1,0 +1,36 @@
+{
+  "profile": {
+    "uuid": "e31a8b3b-0020-40b6-b387-967546c5205a",
+    "metadata": {
+      "title": "CGE-P HIPAA-minimum control selection (Acme Health Patient Intake API)",
+      "last-modified": "2026-06-06T00:00:00Z",
+      "version": "1.0.0",
+      "oscal-version": "1.1.2",
+      "remarks": "Selects the NIST SP 800-53 Rev. 5 controls that back the HIPAA Security Rule citations in component-definition.json. There is no NIST-published HIPAA OSCAL catalog, so the primary framework (HIPAA, cited via SP 800-66 Rev. 2 in the component) is realised here through its 800-53 control equivalents. See README.md in this directory for the HIPAA -> 800-53 crosswalk."
+    },
+    "imports": [
+      {
+        "href": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "include-controls": [
+          {
+            "with-ids": [
+              "ac-3",
+              "ac-6",
+              "au-2",
+              "au-12",
+              "cp-9",
+              "sc-7",
+              "sc-8",
+              "sc-13",
+              "sc-28",
+              "cm-6"
+            ]
+          }
+        ]
+      }
+    ],
+    "merge": {
+      "as-is": true
+    }
+  }
+}
