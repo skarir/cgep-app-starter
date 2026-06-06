@@ -1,0 +1,20 @@
+# Lab 6.1 Step 7 - OSCAL evidence-link traversal -> vault chain of custody
+# Command: EVIDENCE_VAULT=cgep-lab-grc-evidence-vault-b60d9d5f bash scripts/verify-evidence.sh 27064467751
+# (run_id matches the href in oscal/component-definitions/acme-patient-intake-api/component-definition.json)
+
+=== Chain of Custody Verification ===
+  Run:    27064467751
+  Vault:  cgep-lab-grc-evidence-vault-b60d9d5f
+  Bundle: evidence-bundle-27064467751.tar.gz
+
+=== 1. Integrity (SHA-256) ===
+  OK (63a6642baed9d271e7635af15aa4370a223794702d05011872fe61b50c02a7ed)
+
+=== 2. Authenticity + Timeliness (Cosign + Sigstore Rekor) ===
+Verified OK
+  OK (Cosign verified, Rekor timestamp recorded)
+
+=== 3. Preservation (Object Lock retention) ===
+  OK (retain until 2026-07-06T14:09:04.939000+00:00)
+
+CHAIN INTACT for run 27064467751

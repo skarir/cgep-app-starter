@@ -104,7 +104,7 @@ echo ""
 echo "=== 2. Authenticity + Timeliness (Cosign + Sigstore Rekor) ==="
 cosign verify-blob \
   --bundle "./${SIG_NAME}" \
-  --certificate-identity-regexp 'https://github\.com/skarir/cgep-app-starter' \
+  --certificate-identity-regexp 'https://github\.com/skarir/cgep-app-starter/.*' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   "./${BUNDLE_NAME}" && echo "  OK (Cosign verified, Rekor timestamp recorded)" || {
   echo "  FAIL: cosign verify-blob returned non-zero" >&2; exit 1
