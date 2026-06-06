@@ -1,4 +1,4 @@
-# terraform/baselines/gcp/data_access_logs.tf
+# terraform/baselines/gcp/audit_logs.tf
 # Controls: AU-2 (auditable events), AU-12 (audit record generation)
 #
 # GCP Data Access audit logs are OFF BY DEFAULT for all services.

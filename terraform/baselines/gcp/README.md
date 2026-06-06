@@ -10,7 +10,7 @@ Terraform module that deploys GCP's identity-first security baseline for the CGE
 | `org_policy.tf` | `iam.disableServiceAccountKeyCreation` | AC-2 | Long-lived JSON key creation is REJECTED — use WIF instead |
 | `org_policy.tf` | `compute.requireOsLogin` | AC-3 | SSH to Compute Engine tied to IAM principals, not metadata keys |
 | `wif.tf` | Workload Identity Federation | AC-2 | GitHub Actions authenticates via OIDC → short-lived token, no key on disk |
-| `data_access_logs.tf` | Data Access audit logs | AU-2, AU-12 | Storage, KMS, IAM DATA_READ/WRITE/ADMIN_READ logged (off by default in GCP) |
+| `audit_logs.tf` | Data Access audit logs | AU-2, AU-12 | Storage, KMS, IAM DATA_READ/WRITE/ADMIN_READ logged (off by default in GCP) |
 
 ## Key lesson: Data Access logs are OFF by default
 
