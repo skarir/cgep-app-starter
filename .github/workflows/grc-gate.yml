@@ -186,20 +186,18 @@ jobs:
         run: |
           VAULT_PREFIX="runs/${{ github.run_id }}"
 
-          # Set Object Lock retention explicitly (30-day GOVERNANCE) so preservation
-          # does not depend on the bucket default. Increasing retention on a new
-          # object is always permitted. (HIPAA 164.312(b) / AU-9 preservation.)
-          RETAIN_UNTIL=$(date -u -d '+30 days' +%Y-%m-%dT%H:%M:%SZ)
-          LOCK_FLAGS="--object-lock-mode GOVERNANCE --object-lock-retain-until-date ${RETAIN_UNTIL}"
-
+          # Object Lock retention is inherited from the vault's default rule
+          # (30-day GOVERNANCE — see terraform/primitives/evidence-vault and the
+          # bucket's object-lock-configuration). The high-level `aws s3 cp` applies
+          # the bucket default automatically. (HIPAA 164.312(b) / AU-9 preservation.)
           aws s3 cp "${{ env.BUNDLE_NAME }}" \
-            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}" $LOCK_FLAGS
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}"
 
           aws s3 cp "${{ env.SHA_NAME }}" \
-            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SHA_NAME }}" $LOCK_FLAGS
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SHA_NAME }}"
 
           aws s3 cp "${{ env.SIG_NAME }}" \
-            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SIG_NAME }}" $LOCK_FLAGS
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.SIG_NAME }}"
 
           # Machine-readable receipt consumed by verify-evidence.sh
           VERSION_ID=$(aws s3api head-object \
@@ -217,7 +215,7 @@ jobs:
             "${{ github.ref }}" > receipt.json
 
           aws s3 cp receipt.json \
-            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/receipt.json" $LOCK_FLAGS
+            "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/receipt.json"
 
           echo "Uploaded to s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/"
           echo "Verify: EVIDENCE_VAULT=${EVIDENCE_BUCKET} bash scripts/verify-evidence.sh ${{ github.run_id }}"
