@@ -95,7 +95,7 @@
                 ],
                 "links": [
                   {
-                    "href": "s3://REPLACE_WITH_EVIDENCE_BUCKET/runs/latest/evidence-bundle.tar.gz",
+                    "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
                     "text": "Signed evidence bundle — Cosign signature verifies against Sigstore Rekor"
                   }
@@ -161,7 +161,7 @@
                 ],
                 "links": [
                   {
-                    "href": "s3://REPLACE_WITH_EVIDENCE_BUCKET/runs/latest/evidence-bundle.tar.gz",
+                    "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
                     "text": "Signed evidence bundle"
                   }
@@ -199,7 +199,7 @@
                 ],
                 "links": [
                   {
-                    "href": "s3://REPLACE_WITH_EVIDENCE_BUCKET/runs/latest/evidence-bundle.tar.gz",
+                    "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
                     "text": "Signed evidence bundle"
                   }
@@ -233,7 +233,7 @@
                 ],
                 "links": [
                   {
-                    "href": "s3://REPLACE_WITH_EVIDENCE_BUCKET/runs/latest/evidence-bundle.tar.gz",
+                    "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
                     "text": "Signed evidence bundle"
                   }
@@ -280,7 +280,7 @@
                 ],
                 "links": [
                   {
-                    "href": "s3://REPLACE_WITH_EVIDENCE_BUCKET/runs/latest/evidence-bundle.tar.gz",
+                    "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
                     "text": "Signed evidence bundle — grader runs scripts/verify-evidence.sh against this URI"
                   }
