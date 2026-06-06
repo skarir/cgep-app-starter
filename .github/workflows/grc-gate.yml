@@ -186,6 +186,10 @@ jobs:
         run: |
           VAULT_PREFIX="runs/${{ github.run_id }}"
 
+          # Object Lock retention is inherited from the vault's default rule
+          # (30-day GOVERNANCE — see terraform/primitives/evidence-vault and the
+          # bucket's object-lock-configuration). The high-level `aws s3 cp` applies
+          # the bucket default automatically. (HIPAA 164.312(b) / AU-9 preservation.)
           aws s3 cp "${{ env.BUNDLE_NAME }}" \
             "s3://${EVIDENCE_BUCKET}/${VAULT_PREFIX}/${{ env.BUNDLE_NAME }}"
 

@@ -43,7 +43,7 @@ Every merge to `main` produces a tamper-evident evidence bundle:
 4. **Terraform outputs** (`tf-outputs.json`) — deployed resource identifiers
 5. **SHA-256 sidecar** (`.sha256`) — integrity fingerprint
 6. **Cosign keyless signature** (`.sig.bundle`) — GitHub OIDC → Fulcio cert → Rekor transparency log entry
-7. **S3 Object Lock** (GOVERNANCE, 365 days) — preservation guarantee
+7. **S3 Object Lock** (GOVERNANCE, 30 days) — preservation guarantee
 
 Verification:
 ```bash
