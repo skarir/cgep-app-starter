@@ -2,7 +2,7 @@
   "component-definition": {
     "uuid": "d658de28-e696-48b9-99d8-783b3097382a",
     "metadata": {
-      "title": "Acme Health — Patient Intake API GRC Controls",
+      "title": "Acme Health \u2014 Patient Intake API GRC Controls",
       "last-modified": "2026-05-23T00:00:00Z",
       "version": "1.0.0",
       "oscal-version": "1.1.2",
@@ -10,25 +10,25 @@
     },
     "components": [
       {
-        "uuid": "d658de28-e696-48b9-99d8-783b3097382a",
+        "uuid": "f33bc707-90f1-4d0d-a709-d75da0f1565f",
         "type": "software",
-        "title": "Patient Intake API — GRC-hardened baseline",
+        "title": "Patient Intake API \u2014 GRC-hardened baseline",
         "description": "AWS serverless workload (Lambda + API Gateway + DynamoDB + S3) inherited from the CGE-P starter and wrapped with HIPAA-aligned GRC controls via Terraform, OPA, and GitHub Actions.",
         "props": [
           {
             "name": "iac-module",
             "value": "terraform/grc_baseline.tf",
-            "remarks": "Terraform GRC baseline — Layer 1"
+            "remarks": "Terraform GRC baseline \u2014 Layer 1"
           },
           {
             "name": "policy-suite",
             "value": "policies/",
-            "remarks": "OPA Rego policy suite — Layer 2"
+            "remarks": "OPA Rego policy suite \u2014 Layer 2"
           },
           {
             "name": "pipeline",
             "value": ".github/workflows/grc-gate.yml",
-            "remarks": "GitHub Actions evidence pipeline — Layer 3"
+            "remarks": "GitHub Actions evidence pipeline \u2014 Layer 3"
           },
           {
             "name": "primary-framework",
@@ -48,14 +48,18 @@
         "control-implementations": [
           {
             "uuid": "aad0e49e-01a2-4632-abea-4f1c26a09740",
-            "source": "https://csrc.nist.gov/publications/detail/sp/800-66/rev-2/final",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
             "description": "HIPAA Security Rule controls implemented via Terraform baseline, OPA policy suite, and GitHub Actions evidence pipeline.",
             "implemented-requirements": [
               {
                 "uuid": "5f126dcd-199f-4a52-893f-9ff3c44fe942",
-                "control-id": "164.312(a)(2)(iv)",
-                "description": "Encryption and decryption — S3 uploads bucket and DynamoDB submissions table are encrypted with a customer-managed KMS key (aws_kms_key.phi). The CMK has key rotation enabled. This closes GAP-01 and GAP-02.",
+                "control-id": "sc-28",
+                "description": "Encryption and decryption \u2014 S3 uploads bucket and DynamoDB submissions table are encrypted with a customer-managed KMS key (aws_kms_key.phi). The CMK has key rotation enabled. This closes GAP-01 and GAP-02.",
                 "props": [
+                  {
+                    "name": "hipaa-control",
+                    "value": "164.312(a)(2)(iv)"
+                  },
                   {
                     "name": "terraform-resource",
                     "value": "aws_kms_key.phi"
@@ -97,15 +101,19 @@
                   {
                     "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
-                    "text": "Signed evidence bundle — Cosign signature verifies against Sigstore Rekor"
+                    "text": "Signed evidence bundle \u2014 Cosign signature verifies against Sigstore Rekor"
                   }
                 ]
               },
               {
                 "uuid": "9bf7e505-7041-4755-bc76-41b83d505d18",
-                "control-id": "164.312(e)(1)",
-                "description": "Transmission security — S3 uploads bucket has an aws_s3_bucket_policy denying requests where aws:SecureTransport is false (GAP-03). Lambda is placed inside the VPC private subnets with a hardened security group (GAP-05). VPC Gateway endpoints for S3 and DynamoDB prevent traffic from leaving the VPC.",
+                "control-id": "sc-8",
+                "description": "Transmission security \u2014 S3 uploads bucket has an aws_s3_bucket_policy denying requests where aws:SecureTransport is false (GAP-03). Lambda is placed inside the VPC private subnets with a hardened security group (GAP-05). VPC Gateway endpoints for S3 and DynamoDB prevent traffic from leaving the VPC.",
                 "props": [
+                  {
+                    "name": "hipaa-control",
+                    "value": "164.312(e)(1)"
+                  },
                   {
                     "name": "terraform-resource",
                     "value": "aws_s3_bucket_policy.uploads_tls_only"
@@ -169,9 +177,13 @@
               },
               {
                 "uuid": "0ad28f7b-666b-4720-9e16-1c630719a117",
-                "control-id": "164.308(a)(7)",
-                "description": "Contingency plan — S3 versioning enabled on the uploads bucket (GAP-04) makes PHI overwrites recoverable. The evidence vault bucket also has versioning and Object Lock (GOVERNANCE mode, 30-day retention) to preserve audit artefacts.",
+                "control-id": "cp-9",
+                "description": "Contingency plan \u2014 S3 versioning enabled on the uploads bucket (GAP-04) makes PHI overwrites recoverable. The evidence vault bucket also has versioning and Object Lock (GOVERNANCE mode, 30-day retention) to preserve audit artefacts.",
                 "props": [
+                  {
+                    "name": "hipaa-control",
+                    "value": "164.308(a)(7)"
+                  },
                   {
                     "name": "terraform-resource",
                     "value": "aws_s3_bucket_versioning.uploads"
@@ -207,9 +219,13 @@
               },
               {
                 "uuid": "0c1559b9-6d7e-4b96-8417-c08e52be1ccd",
-                "control-id": "164.312(a)(1)",
-                "description": "Access control — the Lambda IAM inline policy is replaced with a least-privilege policy granting only PutItem, GetItem, UpdateItem, Query on DynamoDB and PutObject, GetObject on the uploads path (GAP-07). The OPA policy blocks wildcard IAM actions in CI.",
+                "control-id": "ac-3",
+                "description": "Access control \u2014 the Lambda IAM inline policy is replaced with a least-privilege policy granting only PutItem, GetItem, UpdateItem, Query on DynamoDB and PutObject, GetObject on the uploads path (GAP-07). The OPA policy blocks wildcard IAM actions in CI.",
                 "props": [
+                  {
+                    "name": "hipaa-control",
+                    "value": "164.312(a)(1)"
+                  },
                   {
                     "name": "terraform-resource",
                     "value": "aws_iam_role_policy.lambda_least_privilege"
@@ -241,9 +257,13 @@
               },
               {
                 "uuid": "c9185d78-dc15-4526-8939-377cb327c5a6",
-                "control-id": "164.312(b)",
-                "description": "Audit controls — CloudTrail trail (multi-region, log-file-validation enabled) writes to a dedicated S3 bucket. The evidence vault (S3 + Object Lock) stores pipeline artefacts signed with Cosign keyless. Every PR merge is an audit event producing a verifiable evidence bundle.",
+                "control-id": "au-2",
+                "description": "Audit controls \u2014 CloudTrail trail (multi-region, log-file-validation enabled) writes to a dedicated S3 bucket. The evidence vault (S3 + Object Lock) stores pipeline artefacts signed with Cosign keyless. Every PR merge is an audit event producing a verifiable evidence bundle.",
                 "props": [
+                  {
+                    "name": "hipaa-control",
+                    "value": "164.312(b)"
+                  },
                   {
                     "name": "terraform-resource",
                     "value": "aws_cloudtrail.main"
@@ -258,11 +278,11 @@
                   },
                   {
                     "name": "pipeline-step",
-                    "value": "Step 4 — Cosign keyless sign"
+                    "value": "Step 4 \u2014 Cosign keyless sign"
                   },
                   {
                     "name": "pipeline-step",
-                    "value": "Step 5 — Upload to Object Lock vault"
+                    "value": "Step 5 \u2014 Upload to Object Lock vault"
                   },
                   {
                     "name": "gap-partially-closed",
@@ -282,7 +302,7 @@
                   {
                     "href": "s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz",
                     "rel": "evidence",
-                    "text": "Signed evidence bundle — grader runs scripts/verify-evidence.sh against this URI"
+                    "text": "Signed evidence bundle \u2014 grader runs scripts/verify-evidence.sh against this URI"
                   }
                 ]
               }
