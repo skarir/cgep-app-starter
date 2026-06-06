@@ -73,7 +73,7 @@ resource "aws_s3_bucket_object_lock_configuration" "evidence" {
   rule {
     default_retention {
       mode = "GOVERNANCE"
-      days = 365
+      days = 30   # lab/sandbox window; production HIPAA would use a longer term (e.g. 365+)
     }
   }
 }

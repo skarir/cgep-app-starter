@@ -170,7 +170,7 @@
               {
                 "uuid": "0ad28f7b-666b-4720-9e16-1c630719a117",
                 "control-id": "164.308(a)(7)",
-                "description": "Contingency plan — S3 versioning enabled on the uploads bucket (GAP-04) makes PHI overwrites recoverable. The evidence vault bucket also has versioning and Object Lock (GOVERNANCE mode, 365-day retention) to preserve audit artefacts.",
+                "description": "Contingency plan — S3 versioning enabled on the uploads bucket (GAP-04) makes PHI overwrites recoverable. The evidence vault bucket also has versioning and Object Lock (GOVERNANCE mode, 30-day retention) to preserve audit artefacts.",
                 "props": [
                   {
                     "name": "terraform-resource",
