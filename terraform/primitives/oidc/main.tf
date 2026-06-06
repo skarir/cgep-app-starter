@@ -15,7 +15,7 @@ terraform {
 
 provider "aws" { region = "us-east-1" }
 
-variable "github_org"  {
+variable "github_org" {
   type        = string
   description = "GitHub organisation or user name (e.g. skarir)"
 }
@@ -30,8 +30,8 @@ variable "github_repo" {
 #   terraform import aws_iam_openid_connect_provider.github \
 #     arn:aws:iam::ACCOUNT:oidc-provider/token.actions.githubusercontent.com
 resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
+  url            = "https://token.actions.githubusercontent.com"
+  client_id_list = ["sts.amazonaws.com"]
   # GitHub's current OIDC thumbprint (rotated Feb 2023)
   thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
 }

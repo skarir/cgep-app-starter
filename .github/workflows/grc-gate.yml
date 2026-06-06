@@ -86,6 +86,25 @@ jobs:
           chmod +x tfsec
           sudo mv tfsec /usr/local/bin/
 
+      # ── Tier-0 static analysis (fmt, secrets, IaC scan) ──────────────
+      - name: "Tier-0 — Terraform fmt check"
+        run: terraform fmt -check -recursive $TF_DIR
+
+      - name: "Tier-0 — Gitleaks secret scan"
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Tier-0 — Checkov IaC scan (informational)"
+        run: |
+          pip install --quiet checkov
+          # Informational, not a hard gate: terraform/ intentionally contains
+          # non-compliant fixtures (compliant-gcs-negative-test, lab-3-4-broken)
+          # and the starter's deliberate GAPS — blocking those is Step 2's job
+          # (the OPA policy gate). Checkov runs here for visibility; findings are
+          # captured into the evidence bundle, not used to fail the build.
+          checkov -d "$TF_DIR" --compact --soft-fail | tee checkov-results.txt || true
+
       # ── Step 1: Plan ─────────────────────────────────────────────────
       - name: "Step 1 — Terraform Plan"
         id: tf-plan
@@ -135,16 +154,26 @@ jobs:
             opa-test.log
           retention-days: 90
 
-      # ── No apply in CI ───────────────────────────────────────────────
-      # Infrastructure is applied locally / out-of-band by an operator with
-      # change permissions. The CI OIDC role (cgep-grc-gate) is deliberately
-      # read-only, so CI is the *detective* evidence pipeline: plan -> policy
-      # gate -> sign -> upload. This avoids a privileged apply role in CI and
-      # keeps every run a tamper-evident audit record. (Matches the labs
-      # reference pattern; see WRITEUP.md "CI does not apply".)
+      # ── Step 3: Apply (merge to main, gated) ─────────────────────────
+      # Brief Layer 3, step 3. Applies on merge to main ONLY when the repo
+      # variable ENABLE_APPLY=true. Default OFF on purpose:
+      #   - the CI OIDC role (cgep-grc-gate) is read-only, and
+      #   - the full baseline is not yet applied, so an unguarded apply would
+      #     deploy the entire stack (cost) from CI.
+      # To turn it on safely: grant the OIDC role a scoped apply policy, wire a
+      # remote backend, then set ENABLE_APPLY=true. Keyless OIDC throughout —
+      # no long-lived AWS keys (unlike the static-key reference). See WRITEUP.md.
+      - name: "Step 3 — Terraform Apply (merge to main)"
+        id: tf-apply
+        if: vars.ENABLE_APPLY == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd $TF_DIR
+          terraform apply -auto-approve -input=false tfplan
+          terraform output -json > ../tf-outputs.json
+          echo "Apply complete."
 
-      # ── Step 3: Sign evidence bundle ─────────────────────────────────
-      - name: "Step 3 — Sign Evidence Bundle (Cosign keyless)"
+      # ── Step 4: Sign evidence bundle ─────────────────────────────────
+      - name: "Step 4 — Sign Evidence Bundle (Cosign keyless)"
         id: sign
         if: always()   # Lab 4.4: sign every run (PRs + merges) — chain must never break
         run: |
@@ -158,6 +187,7 @@ jobs:
             conftest-results.json \
             tfsec-results.json \
             opa-test.log \
+            $([ -f checkov-results.txt ] && echo checkov-results.txt || true) \
             $([ -f tf-outputs.json ] && echo tf-outputs.json || true) 2>/dev/null || true
 
           # Integrity sidecar
@@ -175,8 +205,8 @@ jobs:
           echo "SHA_NAME=$SHA_NAME"       >> "$GITHUB_ENV"
           echo "SIG_NAME=$SIG_NAME"       >> "$GITHUB_ENV"
 
-      # ── Step 4: Upload to Object Lock vault ──────────────────────────
-      - name: "Step 4 — Upload Signed Bundle to Evidence Vault"
+      # ── Step 5: Upload to Object Lock vault ──────────────────────────
+      - name: "Step 5 — Upload Signed Bundle to Evidence Vault"
         id: upload
         if: always()   # Lab 4.4: preserve chain on both passing and failing runs
         env:
