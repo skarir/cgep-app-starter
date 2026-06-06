@@ -13,5 +13,7 @@ crash.log
 terraform/lambda/handler.zip
 
 # Local
-evidence/
+# evidence/ is committed as the in-repo audit trail (matches the labs reference).
+# Only transient Terraform state snapshots captured as evidence are excluded.
+evidence/**/state.json
 .DS_Store
