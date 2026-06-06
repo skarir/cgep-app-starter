@@ -93,9 +93,13 @@ jobs:
         run: terraform fmt -check -recursive $TF_DIR
 
       - name: "Tier-0 — Gitleaks secret scan"
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Scan the working tree directly (--no-git) so the gate is robust across
+          # PRs, pushes, and force-pushed/rewritten history — the action's git-diff
+          # mode breaks when the push's "before" commit is gone.
+          GLV="8.24.3"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GLV}/gitleaks_${GLV}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks detect --source . --no-git --redact -v
 
       - name: "Tier-0 — Checkov IaC scan (informational)"
         run: |
