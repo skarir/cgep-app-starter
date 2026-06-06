@@ -31,12 +31,12 @@ HIPAA citation in a `hipaa-control` prop on each `implemented-requirement`.
 
 Evidence links in the component definition resolve to a signed bundle in the Lab 2.5 vault, e.g.:
 
-`s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27063453379/evidence-bundle-27063453379.tar.gz`
+`s3://cgep-lab-grc-evidence-vault-b60d9d5f/runs/27064467751/evidence-bundle-27064467751.tar.gz`
 
 Verify the chain (integrity + authenticity + Object Lock preservation):
 
 ```bash
-EVIDENCE_VAULT=cgep-lab-grc-evidence-vault-b60d9d5f bash scripts/verify-evidence.sh 27063453379
+EVIDENCE_VAULT=cgep-lab-grc-evidence-vault-b60d9d5f bash scripts/verify-evidence.sh 27064467751
 ```
 
 ## Validation
