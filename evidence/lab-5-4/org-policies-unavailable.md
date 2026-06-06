@@ -12,7 +12,7 @@ grant the required role fails:
 
 ```
 $ gcloud projects add-iam-policy-binding cgep-lab-sunil-2026 \
-    --member=user:sunil.karir@gmail.com --role=roles/orgpolicy.policyAdmin
+    --member=user:redacted@example.com --role=roles/orgpolicy.policyAdmin
 ERROR: INVALID_ARGUMENT: Role roles/orgpolicy.policyAdmin is not supported for this resource.
 ```
 
