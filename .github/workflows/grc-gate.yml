@@ -42,6 +42,8 @@ jobs:
       # ── Prerequisites ────────────────────────────────────────────────
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so gitleaks can diff (Tier-0 secret scan)
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
