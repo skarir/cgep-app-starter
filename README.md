@@ -1,150 +1,129 @@
-# cgep-app-starter — Acme Health Patient Intake API
+# Acme Health — Patient Intake API (GRC-hardened)
 
-> CGE-P Capstone: Patient Intake API hardened to **HIPAA Security Rule** using IaC, Policy-as-Code, a GitHub Actions evidence pipeline, and an OSCAL component definition.
+I inherited a working but audit-indefensible Patient Intake API and spent a month making it
+defensible without slowing the engineering team down. This repo is the result: the original
+AWS workload (a fork of `GRCEngClub/cgep-app-starter`), wrapped in the controls, policy gates,
+signed-evidence pipeline, and OSCAL that prove it stays compliant on every push.
 
-**Primary framework:** HIPAA Security Rule  
-**Grader:** see [Verification instructions](#verification-instructions) below and [WRITEUP.md](WRITEUP.md) for full design rationale.
+**Primary framework:** HIPAA Security Rule — the API handles PHI, so HIPAA is non-optional.
+I explain the choice, the trade-offs, and what I deliberately left undone in [WRITEUP.md](WRITEUP.md).
 
-## What this repo is
+**If you're grading this,** start at [Verifying it yourself](#verifying-it-yourself) and skim
+[WRITEUP.md](WRITEUP.md) for the reasoning behind each decision.
 
-A fork of `GRCEngClub/cgep-app-starter` — a minimal AWS workload (Lambda + API Gateway + DynamoDB + S3) that ships non-compliant on purpose — with four CGE-P compliance layers added on top:
+## How it fits together
 
-| Layer | Location | What it does |
-|-------|----------|--------------|
-| 1 — Terraform baseline | `terraform/grc_baseline.tf`, `terraform/grc_override.tf` | KMS CMK, S3 evidence vault (Object Lock), CloudTrail, gap-closing overrides |
-| 2 — OPA policy suite | `policies/*.rego` | 6 Rego policies with tests covering all key HIPAA gaps |
-| 3 — GitHub Actions pipeline | `.github/workflows/grc-gate.yml` | Plan → Policy check → Apply (gated, merge to main) → Cosign sign → Upload to vault |
-| 4 — OSCAL component | `oscal/component-definitions/acme-patient-intake-api/component-definition.json` | Machine-readable HIPAA control mapping to signed evidence |
+The starter ships a Lambda + API Gateway + DynamoDB + S3 app that is non-compliant on purpose.
+I left that workload in place and built four things around it:
 
-## Gaps closed
+- **Terraform baseline** (`terraform/`) — a KMS customer-managed key, a versioned S3 evidence
+  vault with Object Lock, a multi-region CloudTrail, and the overrides that bring the starter's
+  bucket, table, and Lambda under those controls.
+- **Policy suite** (`policies/`) — Rego rules, one per gap, each with passing and failing
+  fixtures and the HIPAA control ID baked into the deny message so a failed PR tells you exactly
+  what to fix.
+- **Pipeline** (`.github/workflows/grc-gate.yml`) — five steps in order: plan → policy check →
+  apply (gated, merge to `main`) → Cosign sign → upload to the vault. A green PR and a blocked
+  red PR are both in the history as proof the gate actually decides.
+- **OSCAL component** (`oscal/`) — a component definition + profile + resolved catalog that map
+  what I built to NIST 800-53 controls (with the HIPAA section carried as a prop, since there's
+  no published HIPAA catalog) and link to the real signed evidence in the vault.
 
-| ID | Gap | Status |
-|----|-----|--------|
-| GAP-01 | S3 SSE-KMS | Closed — `grc_baseline.tf` + `s3_cmk_encryption.rego` |
-| GAP-02 | DynamoDB CMK | Closed — `grc_override.tf` + `dynamodb_cmk.rego` |
-| GAP-03 | S3 TLS-only policy | Closed — `grc_baseline.tf` + `s3_tls_required.rego` |
-| GAP-04 | S3 versioning | Closed — `grc_baseline.tf` + `s3_versioning.rego` |
-| GAP-05 | Lambda VPC | Closed — `grc_override.tf` + `lambda_vpc.rego` |
-| GAP-06 | Lambda observability | Partial — documented in [WRITEUP.md](WRITEUP.md) |
-| GAP-07 | IAM wildcard | Closed — `grc_baseline.tf` + `iam_least_privilege.rego` |
-| GAP-08 | API Gateway logging | Partial — documented in [WRITEUP.md](WRITEUP.md) |
+The point of all of it: every push to `main` produces a signed, timestamped artifact in immutable
+storage, automatically. An assessor can follow the OSCAL link into the vault and verify a control
+without ever talking to me.
 
-## The deploy gate (unchanged)
+## The eight gaps
+
+The starter ships with eight named flaws ([GAPS.md](GAPS.md)). I closed six in code and policy,
+and documented the other two honestly rather than half-build them.
+
+| Gap | What it was | How I handled it |
+|-----|-------------|------------------|
+| GAP-01 | S3 used SSE-S3, not a customer key | Closed — CMK in `grc_baseline.tf`, guarded by `s3_cmk_encryption.rego` |
+| GAP-02 | DynamoDB on the AWS-owned key | Closed — `grc_override.tf` + `dynamodb_cmk.rego` |
+| GAP-03 | No TLS-only bucket policy | Closed — `grc_baseline.tf` + `s3_tls_required.rego` |
+| GAP-04 | No S3 versioning | Closed — `grc_baseline.tf` + `s3_versioning.rego` |
+| GAP-05 | Lambda outside the VPC | Closed — `grc_override.tf` + `lambda_vpc.rego` |
+| GAP-06 | No Lambda DLQ / X-Ray / concurrency | Documented — see [WRITEUP.md](WRITEUP.md) |
+| GAP-07 | IAM wildcards (`dynamodb:*`, `s3:*`) | Closed — `grc_baseline.tf` + `iam_least_privilege.rego` |
+| GAP-08 | No API Gateway access logging | Documented — see [WRITEUP.md](WRITEUP.md) |
+
+## Standing the workload up
 
 ```bash
 make creds  AWS_PROFILE=<your-sandbox-profile>
 make deploy AWS_PROFILE=<your-sandbox-profile>
 make test   AWS_PROFILE=<your-sandbox-profile>
-# Expected: {"submission_id": "...", "status": "received"}
+# A healthy run returns: {"submission_id": "...", "status": "received"}
 ```
 
-> **AWS SSO note:** if your profile is SSO-based, use `eval $(aws configure export-credentials --profile <profile> --format env)` before running Terraform commands by hand.
+On SSO-based profiles, export credentials first so Terraform can see them:
+`eval $(aws configure export-credentials --profile <profile> --format env)`.
 
-## Verification instructions
+## Verifying it yourself
 
-### Prerequisites
+You'll need Terraform ≥ 1.6, OPA ≥ 0.65, Conftest ≥ 0.55, Cosign ≥ 2.4, the AWS CLI v2, and
+`pip install compliance-trestle`.
 
-```bash
-terraform --version   # >= 1.6
-opa version           # >= 0.65
-conftest --version    # >= 0.55
-cosign version        # >= 2.4
-aws --version         # AWS CLI v2
-pip install compliance-trestle
-```
-
-### 1 — Apply the GRC baseline
+**Apply the baseline** (KMS key first, so the vault can use it):
 
 ```bash
-# Set these GitHub Actions variables/secrets first:
-#   EVIDENCE_BUCKET — Object Lock S3 bucket name (created by baseline apply)
-#   AWS_ROLE_ARN    — IAM role ARN for GitHub OIDC trust
-
 cd terraform
 terraform init
-terraform apply -target=aws_kms_key.phi   # KMS key first
+terraform apply -target=aws_kms_key.phi
 terraform apply
 ```
 
-### 2 — Run OPA unit tests
+**Run the policy tests and the gate:**
 
 ```bash
 opa test ./policies -v
-# All tests must pass
+terraform show -json tfplan > ../plan.json
+bash ../scripts/policy-gate.sh ../plan.json
 ```
 
-### 3 — Run the policy gate locally
+**Verify a signed evidence bundle end to end** — this is the part worth your time:
 
 ```bash
-cd terraform && terraform show -json tfplan > ../plan.json && cd ..
-bash scripts/policy-gate.sh plan.json
+EVIDENCE_VAULT=<vault-bucket> bash scripts/verify-evidence.sh <run-id>
+# 1. Integrity     SHA-256 recomputes against the sidecar
+# 2. Authenticity  Cosign signature verifies against Sigstore Rekor
+# 3. Preservation  Object Lock retention is still active
+# => CHAIN INTACT
 ```
 
-### 4 — Verify a signed evidence bundle (chain of custody)
+**Validate the OSCAL:**
 
 ```bash
-bash scripts/verify-evidence.sh \
-  s3://<EVIDENCE_BUCKET>/runs/<RUN_ID>/evidence-bundle-<RUN_ID>.tar.gz
-# Expected:
-#   PASS integrity:    SHA-256 matches (...)
-#   PASS authenticity: Cosign signature verified via Sigstore
-#   PASS preservation: Object Lock mode=GOVERNANCE
+cd oscal && trestle validate -a
 ```
 
-### 5 — Validate the OSCAL component
-
-```bash
-trestle validate -f oscal/component-definitions/acme-patient-intake-api/component-definition.json
-```
-
-## Layout
+## What's where
 
 ```
-cgep-app-starter/
-├── README.md                            # this file (grader start here)
-├── WRITEUP.md                           # design rationale, trade-offs, honest gaps
-├── WORKLOAD.md                          # what the API does
-├── GAPS.md                              # eight named flaws + remediation status
-├── FRAMEWORKS.md                        # HIPAA / SOC 2 / CMMC mapping primer
-├── Makefile                             # make deploy | test | destroy
-├── terraform/
-│   ├── main.tf                          # starter (unchanged — intentional gaps)
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── grc_baseline.tf                  # Layer 1 — KMS, evidence vault, CloudTrail
-│   ├── grc_override.tf                  # Layer 1 — Lambda VPC + DynamoDB SSE overrides
-│   └── lambda/handler.py
-├── policies/
-│   ├── s3_cmk_encryption.rego           # GAP-01: S3 must use CMK  [HIPAA 164.312(a)(2)(iv)]
-│   ├── s3_cmk_encryption_test.rego
-│   ├── s3_tls_required.rego             # GAP-03: S3 must deny non-TLS [HIPAA 164.312(e)(1)]
-│   ├── s3_tls_required_test.rego
-│   ├── s3_versioning.rego               # GAP-04: S3 versioning required [HIPAA 164.308(a)(7)]
-│   ├── s3_versioning_test.rego
-│   ├── dynamodb_cmk.rego                # GAP-02: DynamoDB must use CMK [HIPAA 164.312(a)(2)(iv)]
-│   ├── dynamodb_cmk_test.rego
-│   ├── lambda_vpc.rego                  # GAP-05: Lambda must be in VPC [HIPAA 164.312(e)(1)]
-│   ├── lambda_vpc_test.rego
-│   ├── iam_least_privilege.rego         # GAP-07: no IAM wildcard actions [HIPAA 164.312(a)(1)]
-│   └── iam_least_privilege_test.rego
-├── scripts/
-│   ├── policy-gate.sh                   # Conftest wrapper for CI
-│   ├── capture-evidence.sh              # bundle + upload to vault
-│   └── verify-evidence.sh              # integrity + authenticity + preservation
-├── .github/workflows/
-│   └── grc-gate.yml                     # Layer 3 — 5-step CI/CD pipeline
-├── oscal/components/
-│   └── component-definition.json        # Layer 4 — OSCAL HIPAA control mapping
-└── test/
-    └── intake.sh
-
+.
+├── README.md            you are here
+├── WRITEUP.md           design decisions, trade-offs, honest gaps
+├── WORKLOAD.md          what the API actually does
+├── GAPS.md              the eight flaws and their status
+├── FRAMEWORKS.md        HIPAA / SOC 2 / CMMC primer and why I picked HIPAA
+├── COMPLIANCE.md        control-to-code mapping
+├── docs/verification.md recorded Tier-0 / Tier-1 results
+├── terraform/           the starter workload + my GRC baseline and overrides
+├── policies/            the Rego suite (rules + tests)
+├── scripts/             policy-gate, capture-evidence, verify-evidence
+├── oscal/               component definition, profile, resolved catalog
+├── .github/workflows/   grc-gate.yml — the five-step pipeline
+└── test/                intake smoke test
 ```
 
-## Cost
+## Cost and teardown
 
-Roughly $0 if destroyed within an hour. CloudTrail + KMS key rotation cost cents/month.
-`make destroy` tears down everything except the Object Lock vault (retention active).
+Run it in a sandbox and tear it down within the hour and it's effectively free; left running,
+CloudTrail and KMS key rotation cost cents a month. `make destroy` removes everything except the
+Object Lock vault, which stays put until its retention window expires — that's the point of it.
 
 ## License
 
-MIT. Submissions remain learners' own work.
+MIT — see [LICENSE](LICENSE). The work is my own.
