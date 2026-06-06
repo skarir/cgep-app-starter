@@ -1,0 +1,6 @@
+{
+    "HubArn": "arn:aws:securityhub:us-east-1:079092240670:hub/default",
+    "SubscribedAt": "2026-06-02T18:08:35.981Z",
+    "AutoEnableControls": true,
+    "ControlFindingGenerator": "SECURITY_CONTROL"
+}

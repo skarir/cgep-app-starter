@@ -1,0 +1,4 @@
+---
+displayName: GitHub Actions
+name: projects/436304127235/locations/global/workloadIdentityPools/github-actions
+state: ACTIVE

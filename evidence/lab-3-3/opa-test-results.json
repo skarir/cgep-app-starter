@@ -1,0 +1,332 @@
+﻿[
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\sc28_encryption_test.rego",
+      "row": 62,
+      "col": 1
+    },
+    "package": "data.compliance.sc28_test",
+    "name": "test_module_wrapped_bucket_fails",
+    "duration": 1002200
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\ac3_no_public_test.rego",
+      "row": 58,
+      "col": 1
+    },
+    "package": "data.compliance.ac3_test",
+    "name": "test_compliant_bucket_passes",
+    "duration": 1001800
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\ac3_no_public_test.rego",
+      "row": 62,
+      "col": 1
+    },
+    "package": "data.compliance.ac3_test",
+    "name": "test_public_bucket_fails",
+    "duration": 686600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\cm6_required_tags_test.rego",
+      "row": 40,
+      "col": 1
+    },
+    "package": "data.compliance.cm6_test",
+    "name": "test_complete_labels_passes",
+    "duration": 686600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\ac3_no_public_test.rego",
+      "row": 68,
+      "col": 1
+    },
+    "package": "data.compliance.ac3_test",
+    "name": "test_open_ssh_fails",
+    "duration": 1134500
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\ac3_no_public_test.rego",
+      "row": 74,
+      "col": 1
+    },
+    "package": "data.compliance.ac3_test",
+    "name": "test_open_rdp_fails",
+    "duration": 1445700
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\cm6_required_tags_test.rego",
+      "row": 44,
+      "col": 1
+    },
+    "package": "data.compliance.cm6_test",
+    "name": "test_partial_labels_fails",
+    "duration": 2580200
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_versioning_test.rego",
+      "row": 7,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_versioning_test",
+    "name": "test_pass_versioning_enabled",
+    "duration": 4268600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\ac3_no_public_test.rego",
+      "row": 80,
+      "col": 1
+    },
+    "package": "data.compliance.ac3_test",
+    "name": "test_restricted_firewall_passes",
+    "duration": 0
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\lambda_vpc_test.rego",
+      "row": 28,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.lambda_vpc_test",
+    "name": "test_fail_lambda_no_vpc_config",
+    "duration": 36879900
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\lambda_vpc_test.rego",
+      "row": 49,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.lambda_vpc_test",
+    "name": "test_fail_lambda_vpc_config_no_subnets",
+    "duration": 2010100
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\iam_least_privilege_test.rego",
+      "row": 36,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.iam_least_privilege_test",
+    "name": "test_fail_s3_wildcard",
+    "duration": 48615600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\iam_least_privilege_test.rego",
+      "row": 52,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.iam_least_privilege_test",
+    "name": "test_pass_string_action_specific",
+    "duration": 48603300
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\cm6_required_tags_test.rego",
+      "row": 56,
+      "col": 1
+    },
+    "package": "data.compliance.cm6_test",
+    "name": "test_non_labelable_passes",
+    "duration": 37507100
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\dynamodb_cmk_test.rego",
+      "row": 7,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.dynamodb_cmk_test",
+    "name": "test_pass_table_has_cmk_sse",
+    "duration": 2392800
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_cmk_encryption_test.rego",
+      "row": 7,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_cmk_encryption_test",
+    "name": "test_pass_sse_uses_kms",
+    "duration": 39909900
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\cm6_required_tags_test.rego",
+      "row": 50,
+      "col": 1
+    },
+    "package": "data.compliance.cm6_test",
+    "name": "test_no_labels_fails",
+    "duration": 52088900
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\dynamodb_cmk_test.rego",
+      "row": 29,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.dynamodb_cmk_test",
+    "name": "test_fail_table_no_sse_block",
+    "duration": 1080500
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\dynamodb_cmk_test.rego",
+      "row": 51,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.dynamodb_cmk_test",
+    "name": "test_fail_table_sse_no_cmk",
+    "duration": 1080500
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\lambda_vpc_test.rego",
+      "row": 7,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.lambda_vpc_test",
+    "name": "test_pass_lambda_has_vpc_config",
+    "duration": 51077900
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_versioning_test.rego",
+      "row": 52,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_versioning_test",
+    "name": "test_fail_versioning_suspended",
+    "duration": 2183600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_tls_required_test.rego",
+      "row": 7,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_tls_required_test",
+    "name": "test_pass_bucket_has_tls_policy",
+    "duration": 1012200
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_cmk_encryption_test.rego",
+      "row": 30,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_cmk_encryption_test",
+    "name": "test_fail_sse_uses_sse_s3",
+    "duration": 997600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_cmk_encryption_test.rego",
+      "row": 57,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_cmk_encryption_test",
+    "name": "test_fail_phi_bucket_no_sse",
+    "duration": 1361700
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_tls_required_test.rego",
+      "row": 34,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_tls_required_test",
+    "name": "test_fail_bucket_no_policy",
+    "duration": 1011600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_versioning_test.rego",
+      "row": 34,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_versioning_test",
+    "name": "test_fail_no_versioning_resource",
+    "duration": 6566700
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\sc28_encryption_test.rego",
+      "row": 50,
+      "col": 1
+    },
+    "package": "data.compliance.sc28_test",
+    "name": "test_noncompliant_fails",
+    "duration": 42221300
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\sc28_encryption_test.rego",
+      "row": 56,
+      "col": 1
+    },
+    "package": "data.compliance.sc28_test",
+    "name": "test_empty_key_fails",
+    "duration": 51323400
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\s3_tls_required_test.rego",
+      "row": 52,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.s3_tls_required_test",
+    "name": "test_fail_bucket_policy_no_tls_deny",
+    "duration": 51323400
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\tests\\sc28_encryption_test.rego",
+      "row": 46,
+      "col": 1
+    },
+    "package": "data.compliance.sc28_test",
+    "name": "test_compliant_passes",
+    "duration": 49324600
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\iam_least_privilege_test.rego",
+      "row": 45,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.iam_least_privilege_test",
+    "name": "test_fail_multiple_wildcards",
+    "duration": 109979000
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\iam_least_privilege_test.rego",
+      "row": 26,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.iam_least_privilege_test",
+    "name": "test_fail_dynamodb_wildcard",
+    "duration": 47587100
+  },
+  {
+    "location": {
+      "file": "\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\policies\\iam_least_privilege_test.rego",
+      "row": 20,
+      "col": 1
+    },
+    "package": "data.compliance.hipaa.iam_least_privilege_test",
+    "name": "test_pass_specific_actions",
+    "duration": 47230400
+  }
+]

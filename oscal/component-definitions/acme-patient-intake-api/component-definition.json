@@ -278,11 +278,11 @@
                   },
                   {
                     "name": "pipeline-step",
-                    "value": "Step 4 \u2014 Cosign keyless sign"
+                    "value": "Step 3 \u2014 Cosign keyless sign"
                   },
                   {
                     "name": "pipeline-step",
-                    "value": "Step 5 \u2014 Upload to Object Lock vault"
+                    "value": "Step 4 \u2014 Upload to Object Lock vault"
                   },
                   {
                     "name": "gap-partially-closed",

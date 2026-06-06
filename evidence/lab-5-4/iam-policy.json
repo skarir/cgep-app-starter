@@ -1,0 +1,80 @@
+{
+  "auditConfigs": [
+    {
+      "auditLogConfigs": [
+        {
+          "logType": "DATA_READ"
+        },
+        {
+          "logType": "ADMIN_READ"
+        },
+        {
+          "logType": "DATA_WRITE"
+        }
+      ],
+      "service": "storage.googleapis.com"
+    },
+    {
+      "auditLogConfigs": [
+        {
+          "logType": "DATA_WRITE"
+        },
+        {
+          "logType": "DATA_READ"
+        },
+        {
+          "logType": "ADMIN_READ"
+        }
+      ],
+      "service": "iam.googleapis.com"
+    },
+    {
+      "auditLogConfigs": [
+        {
+          "logType": "DATA_WRITE"
+        },
+        {
+          "logType": "DATA_READ"
+        },
+        {
+          "logType": "ADMIN_READ"
+        }
+      ],
+      "service": "cloudkms.googleapis.com"
+    }
+  ],
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:436304127235@cloudservices.gserviceaccount.com"
+      ],
+      "role": "roles/compute.instanceGroupManagerServiceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:service-436304127235@compute-system.iam.gserviceaccount.com"
+      ],
+      "role": "roles/compute.serviceAgent"
+    },
+    {
+      "members": [
+        "serviceAccount:436304127235-compute@developer.gserviceaccount.com"
+      ],
+      "role": "roles/editor"
+    },
+    {
+      "members": [
+        "user:sunil.karir@gmail.com"
+      ],
+      "role": "roles/owner"
+    },
+    {
+      "members": [
+        "serviceAccount:cgep-grc-gate-sa@cgep-lab-sunil-2026.iam.gserviceaccount.com"
+      ],
+      "role": "roles/viewer"
+    }
+  ],
+  "etag": "BwZTXintdJQ=",
+  "version": 1
+}

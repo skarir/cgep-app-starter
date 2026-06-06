@@ -1,0 +1,5 @@
+---
+attributeCondition: assertion.repository == "skarir/cgep-app-starter"
+displayName: GitHub OIDC provider
+name: projects/436304127235/locations/global/workloadIdentityPools/github-actions/providers/github
+state: ACTIVE

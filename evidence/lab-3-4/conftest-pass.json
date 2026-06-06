@@ -1,0 +1,22 @@
+﻿[
+    {
+        "filename":  "C:\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\terraform\\primitives\\compliant-s3\\plan.json",
+        "namespace":  "compliance.sc28_aws",
+        "successes":  1
+    },
+    {
+        "filename":  "C:\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\terraform\\primitives\\compliant-s3\\plan.json",
+        "namespace":  "compliance.ac3_aws",
+        "successes":  1
+    },
+    {
+        "filename":  "C:\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\terraform\\primitives\\compliant-s3\\plan.json",
+        "namespace":  "compliance.cm6_aws",
+        "successes":  1
+    },
+    {
+        "filename":  "C:\\Users\\sunil\\OneDrive\\Desktop\\Open Source Jobs\\cgep-capstone\\terraform\\primitives\\compliant-s3\\plan.json",
+        "namespace":  "compliance.cm6",
+        "successes":  1
+    }
+]
