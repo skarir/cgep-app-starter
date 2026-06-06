@@ -17,7 +17,7 @@ SOC 2 Type II was the obvious second choice, and an enterprise customer push mak
 **How the choice propagates:**
 
 - Every Rego policy `# METADATA` block carries `framework: hipaa` and at least one `164.x` control ID.
-- The OSCAL `component-definition.json` sets `source` to NIST SP 800-66 Rev. 2 (the authoritative HIPAA implementation guide published by NIST).
+- The OSCAL `component-definition.json` cites NIST SP 800-53 Rev. 5 control IDs (`sc-28`, `sc-8`, `cp-9`, `ac-3`, `au-2`) as the `control-id`/`source` — the valid OSCAL token form, since HIPAA §164.x identifiers contain parentheses that OSCAL rejects — and preserves the HIPAA citation in a `hipaa-control` prop on each `implemented-requirement`. The `cge-p-hipaa-minimum` profile selects exactly these controls. (There is no NIST-published HIPAA OSCAL catalog; SP 800-66 Rev. 2 is the prose mapping.)
 - Cross-references to SOC 2 (CC6.x) and CMMC (SC.L2-x, AC.L2-x) appear as `props` on each `implemented-requirement`, making the mapping visible to an auditor without polluting the primary citation chain.
 
 ---
@@ -168,5 +168,5 @@ opa test ./policies -v
 
 # 4. Validate OSCAL document (requires compliance-trestle)
 pip install compliance-trestle
-trestle validate -f oscal/components/component-definition.json
+trestle validate -f oscal/component-definitions/acme-patient-intake-api/component-definition.json
 ```

@@ -1,0 +1,5 @@
+# Lab 6.1 - trestle validate output (compliance-trestle)
+# Command: cd oscal && trestle validate -a
+
+VALID: Model oscal/component-definitions/acme-patient-intake-api/component-definition.json passed the Validator to confirm the model passes all registered validation tests.
+VALID: Model oscal/profiles/cge-p-hipaa-minimum/profile.json passed the Validator to confirm the model passes all registered validation tests.
