@@ -14,8 +14,8 @@ terraform {
 }
 
 provider "google" {
-  project               = var.gcp_project
-  region                = "us-central1"
+  project = var.gcp_project
+  region  = "us-central1"
   # Required for orgpolicy.googleapis.com with user ADC credentials
   user_project_override = true
   billing_project       = var.gcp_project

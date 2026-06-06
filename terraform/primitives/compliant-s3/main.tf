@@ -1,4 +1,4 @@
-﻿# main.tf
+# main.tf
 # Lab 2.3 - First Compliant Resource (AWS S3)
 # Controls enforced: SC-28, AU-3, AU-6, CM-6, AC-3
 

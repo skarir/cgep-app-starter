@@ -6,7 +6,7 @@
 
 resource "aws_s3_bucket" "trail" {
   bucket        = "cgep-lab-cloudtrail-${random_id.suffix.hex}"
-  force_destroy = true   # allows terraform destroy to remove the bucket+logs
+  force_destroy = true # allows terraform destroy to remove the bucket+logs
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "trail" {
@@ -28,9 +28,9 @@ resource "aws_s3_bucket_public_access_block" "trail" {
 # aws:SourceArn scopes the permission to exactly this trail (prevents confused-deputy).
 data "aws_iam_policy_document" "trail" {
   statement {
-    sid     = "AWSCloudTrailAclCheck"
-    effect  = "Allow"
-    actions = ["s3:GetBucketAcl"]
+    sid       = "AWSCloudTrailAclCheck"
+    effect    = "Allow"
+    actions   = ["s3:GetBucketAcl"]
     resources = [aws_s3_bucket.trail.arn]
     principals {
       type        = "Service"
@@ -44,9 +44,9 @@ data "aws_iam_policy_document" "trail" {
   }
 
   statement {
-    sid     = "AWSCloudTrailWrite"
-    effect  = "Allow"
-    actions = ["s3:PutObject"]
+    sid       = "AWSCloudTrailWrite"
+    effect    = "Allow"
+    actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.trail.arn}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
     principals {
       type        = "Service"
@@ -76,9 +76,9 @@ resource "aws_s3_bucket_policy" "trail" {
 resource "aws_cloudtrail" "mgmt" {
   name                          = "cgep-lab-mgmt"
   s3_bucket_name                = aws_s3_bucket.trail.id
-  is_multi_region_trail         = true   # AU-2: captures events in every region
-  include_global_service_events = true   # IAM, STS, Route 53 events
-  enable_log_file_validation    = true   # AU-10: signed hourly digest for tamper detection
+  is_multi_region_trail         = true # AU-2: captures events in every region
+  include_global_service_events = true # IAM, STS, Route 53 events
+  enable_log_file_validation    = true # AU-10: signed hourly digest for tamper detection
 
   # Management events only — no data events (no extra cost)
   event_selector {

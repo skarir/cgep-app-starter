@@ -73,7 +73,7 @@ resource "aws_s3_bucket_object_lock_configuration" "evidence" {
   rule {
     default_retention {
       mode = "GOVERNANCE"
-      days = 30   # lab/sandbox window; production HIPAA would use a longer term (e.g. 365+)
+      days = 30 # lab/sandbox window; production HIPAA would use a longer term (e.g. 365+)
     }
   }
 }
@@ -332,9 +332,9 @@ resource "aws_iam_role_policy" "lambda_least_privilege" {
         ]
       },
       {
-        Sid    = "KMSUseForPHI"
-        Effect = "Allow"
-        Action = ["kms:GenerateDataKey", "kms:Decrypt"]
+        Sid      = "KMSUseForPHI"
+        Effect   = "Allow"
+        Action   = ["kms:GenerateDataKey", "kms:Decrypt"]
         Resource = [aws_kms_key.phi.arn]
       }
     ]
