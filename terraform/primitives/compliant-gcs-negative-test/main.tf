@@ -22,6 +22,6 @@ module "data_bucket" {
   gcp_project        = "cgep-lab-sunil-2026"
   project_label      = "cgep-lab"
   environment        = "prod"
-  retention_days     = 30          # INTENTIONAL VIOLATION: prod requires >= 365
+  retention_days     = 30 # INTENTIONAL VIOLATION: prod requires >= 365
   bucket_name_suffix = "should-never-exist"
 }

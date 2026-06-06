@@ -49,10 +49,10 @@ resource "google_kms_key_ring" "ring" {
 resource "google_kms_crypto_key" "key" {
   name            = local.key_id
   key_ring        = google_kms_key_ring.ring.id
-  rotation_period = "7776000s"   # 90 days
+  rotation_period = "7776000s" # 90 days
 
   lifecycle {
-    prevent_destroy = false   # flip to true in production
+    prevent_destroy = false # flip to true in production
   }
 }
 
@@ -88,7 +88,7 @@ resource "google_storage_bucket" "bucket" {
   # AU-11: Retention policy — objects cannot be deleted before retention_days expires.
   retention_policy {
     retention_period = var.retention_days * 86400
-    is_locked        = false   # flip to true to make immutable (one-way operation)
+    is_locked        = false # flip to true to make immutable (one-way operation)
   }
 
   # CM-6: Required labels merged with any consumer-supplied extras.

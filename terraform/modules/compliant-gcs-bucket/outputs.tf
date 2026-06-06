@@ -24,7 +24,7 @@ output "compliance_attestation" {
     uniform_access_enforced  = google_storage_bucket.bucket.uniform_bucket_level_access
     retention_period_days    = var.retention_days
     kms_rotation_period      = google_kms_crypto_key.key.rotation_period
-    required_labels_present  = alltrue([
+    required_labels_present = alltrue([
       for k in keys(local.required_labels) :
       contains(keys(google_storage_bucket.bucket.labels), k)
     ])

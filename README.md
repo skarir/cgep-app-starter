@@ -13,7 +13,7 @@ A fork of `GRCEngClub/cgep-app-starter` — a minimal AWS workload (Lambda + API
 |-------|----------|--------------|
 | 1 — Terraform baseline | `terraform/grc_baseline.tf`, `terraform/grc_override.tf` | KMS CMK, S3 evidence vault (Object Lock), CloudTrail, gap-closing overrides |
 | 2 — OPA policy suite | `policies/*.rego` | 6 Rego policies with tests covering all key HIPAA gaps |
-| 3 — GitHub Actions pipeline | `.github/workflows/grc-gate.yml` | Plan → Policy check → Cosign sign → Upload to vault (Terraform apply is run locally; the CI OIDC role is read-only) |
+| 3 — GitHub Actions pipeline | `.github/workflows/grc-gate.yml` | Plan → Policy check → Apply (gated, merge to main) → Cosign sign → Upload to vault |
 | 4 — OSCAL component | `oscal/component-definitions/acme-patient-intake-api/component-definition.json` | Machine-readable HIPAA control mapping to signed evidence |
 
 ## Gaps closed

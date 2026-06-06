@@ -26,5 +26,5 @@ module "data_bucket" {
 }
 
 output "attestation" { value = module.data_bucket.compliance_attestation }
-output "bucket_url"  { value = module.data_bucket.bucket_url }
-output "kms_key_id"  { value = module.data_bucket.kms_key_id }
+output "bucket_url" { value = module.data_bucket.bucket_url }
+output "kms_key_id" { value = module.data_bucket.kms_key_id }
