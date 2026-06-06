@@ -12,6 +12,9 @@ crash.log
 # Lambda build
 terraform/lambda/handler.zip
 
+# Trestle cache (downloaded catalogs)
+oscal/.trestle/cache/
+
 # Local
 # evidence/ is committed as the in-repo audit trail (matches the labs reference).
 # Only transient Terraform state snapshots captured as evidence are excluded.
