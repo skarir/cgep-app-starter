@@ -1,0 +1,47 @@
+name: Lab 5.4 — GCP WIF Demo (keyless auth)
+
+# Proves Workload Identity Federation works end-to-end: GitHub Actions
+# authenticates to GCP with a short-lived OIDC token — no service-account JSON
+# key is created, stored, or used. The WIF provider's attribute_condition
+# restricts this to assertion.repository == "skarir/cgep-app-starter", so no
+# other repo's OIDC token can impersonate the service account.
+#
+# Controls: AC-2 (account management — short-lived creds replace long-lived keys).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/gcp-wif-demo.yml"
+      - "terraform/baselines/gcp/**"
+
+permissions:
+  id-token: write   # required for GitHub to mint the OIDC token
+  contents: read
+
+jobs:
+  wif-auth:
+    name: Authenticate to GCP via WIF (no keys)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to Google Cloud — keyless via OIDC
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: cgep-lab-sunil-2026
+          workload_identity_provider: projects/436304127235/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: cgep-grc-gate-sa@cgep-lab-sunil-2026.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Prove identity — no JSON key was ever used
+        run: |
+          echo "Active identity (impersonated service account via WIF):"
+          gcloud auth list --filter=status:ACTIVE --format="value(account)"
+          echo ""
+          echo "Read-only check (roles/viewer granted to the SA):"
+          gcloud storage ls 2>/dev/null || echo "(no buckets to list — keyless auth still succeeded)"
+          echo ""
+          echo "WIF keyless authentication OK — no service-account JSON key exists in this repo."

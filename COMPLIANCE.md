@@ -62,4 +62,4 @@ bash scripts/verify-evidence.sh s3://<EVIDENCE_BUCKET>/runs/<RUN_ID>/evidence-bu
 | 164.312(a)(1) | CC6.3 | AC.L2-3.1.5 |
 | 164.312(b) | CC7.2 | AU.L2-3.3.1 |
 
-Full machine-readable mapping: `oscal/components/component-definition.json`
+Full machine-readable mapping: `oscal/component-definitions/acme-patient-intake-api/component-definition.json`

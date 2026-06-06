@@ -22,5 +22,5 @@ The declared primary framework is the **HIPAA Security Rule**. NIST does not pub
 ```bash
 pip install compliance-trestle
 trestle validate -f oscal/profiles/cge-p-hipaa-minimum/profile.json
-trestle validate -f oscal/components/component-definition.json
+trestle validate -f oscal/component-definitions/acme-patient-intake-api/component-definition.json
 ```
